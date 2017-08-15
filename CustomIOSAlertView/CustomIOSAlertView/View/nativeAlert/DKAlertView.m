@@ -9,27 +9,47 @@
 //  http://opensource.org/licenses/MIT
 //
 
+/* lzy注170815：本类的使用流程：
+ 初始化，
+ 设置containerView属性
+ 设置按钮的title数组
+ 设置代理属性
+ 设置点击block属性（block回调中调用了本类的close方法）
+ 设置了是否显示视差属性。
+ 调用了show方法。
+
+ */
+
 #import "DKAlertView.h"
 #import <QuartzCore/QuartzCore.h>
 
+/* lzy注170815：
+ 声明一些局部常量
+ */
 const static CGFloat kDKAlertViewDefaultButtonHeight       = 50;
 const static CGFloat kDKAlertViewDefaultButtonSpacerHeight = 1;
 const static CGFloat kDKAlertViewCornerRadius              = 7;
 const static CGFloat kDKMotionEffectExtent                = 10.0;
 
-@implementation DKAlertView{
+@implementation DKAlertView{// 两个全局变量
     CGFloat buttonHeight;
     CGFloat buttonSpacerHeight;
 }
 
 
-
+/* lzy注170815：
+ 属性的合成方法。
+ 一直不知道使用。加入『可深入学习的知识』笔记。
+ */
 @synthesize parentView, containerView, dialogView, onButtonTouchUpInside;
 @synthesize delegate;
 @synthesize buttonTitles;
 @synthesize useMotionEffects;
 @synthesize closeOnTouchUpOutside;
 
+/* lzy注170815：
+ 这个方法官方丢弃了。
+ */
 - (id)initWithParentView: (UIView *)_parentView
 {
     self = [self init];
@@ -45,12 +65,26 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
     self = [super init];
     if (self) {
         self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
-
+        /* lzy注170815：
+         这么一使用@synthesize，直接使用属性名访问了。不用带self？？？。
+         初始化一些标识。
+         处理设备转屏。
+         添加键盘通知监听。
+         */
         delegate = self;
         useMotionEffects = false;
         closeOnTouchUpOutside = false;
         buttonTitles = @[@"Close"];
         
+        /* lzy注170815：
+         Begins the generation of notifications of device orientation changes.
+         You must call this method before attempting to get orientation data from the receiver. This method enables the device’s accelerometer hardware and begins the delivery of acceleration events to the receiver. The receiver subsequently uses these events to post UIDeviceOrientationDidChangeNotification notifications when the device orientation changes and to update the orientation property.
+         You may nest calls to this method safely, but you should always match each call with a corresponding call to the endGeneratingDeviceOrientationNotifications method.
+         Availability	iOS (2.0 and later)
+         
+         
+         endGeneratingDeviceOrientationNotifications在本类的而dealloc方法中。
+         */
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];
@@ -63,9 +97,21 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 // Create the dialog view, and animate opening the dialog
 - (void)show
 {
+    // 创建要展示的弹窗主体类
     dialogView = [self createContainerView];
-  
+    /* lzy注170815：
+     A Boolean that indicates whether the layer is rendered as a bitmap before compositing. Animatable
+     When the value of this property is YES, the layer is rendered as a bitmap in its local coordinate space and then composited to the destination with any other content. Shadow effects and any filters in the filters property are rasterized and included in the bitmap. However, the current opacity of the layer is not rasterized. If the rasterized bitmap requires scaling during compositing, the filters in the minificationFilter and magnificationFilter properties are applied as needed.
+     When the value of this property is NO, the layer is composited directly into the destination whenever possible. The layer may still be rasterized prior to compositing if certain features of the compositing model (such as the inclusion of filters) require it.
+     The default value of this property is NO.
+     Availability	iOS (3.2 and later), macOS (10.7 and later), tvOS (9.0 and later)
+     */
     dialogView.layer.shouldRasterize = YES;
+    /* lzy注170815：
+     The scale at which to rasterize content, relative to the coordinate space of the layer. Animatable
+     When the value in the shouldRasterize property is YES, the layer uses this property to determine whether to scale the rasterized content (and by how much). The default value of this property is 1.0, which indicates that the layer should be rasterized at its current size. Larger values magnify the content and smaller values shrink it.
+     Availability	iOS (3.2 and later), macOS (10.7 and later), tvOS (9.0 and later)
+     */
     dialogView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
   
     self.layer.shouldRasterize = YES;
@@ -79,11 +125,12 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 
     self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
 
+    // 将弹窗实体加入到 self上
     [self addSubview:dialogView];
 
     // Can be attached to a view or to the top most window
     // Attached to a view:
-    if (parentView != NULL) {
+    if (parentView != NULL) {// 开发者没有设置parentView，那么直接加到window上
         [parentView addSubview:self];
 
     // Attached to the top most window
@@ -129,6 +176,7 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
     dialogView.layer.opacity = 0.5f;
     dialogView.layer.transform = CATransform3DMakeScale(1.3f, 1.3f, 1.0);
 
+    // 终于配置完成，做动画出现。并在动画过程中修改self的背景色。弹窗实体layer的透明度，并做3D变形
     [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
 					 animations:^{
 						 self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4f];
@@ -141,6 +189,7 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 }
 
 // Button has been touched
+// 这是按钮点击响应的方法，内部回调delegate方法和block
 - (IBAction)customIOS7dialogButtonTouchUpInside:(id)sender
 {
     if (delegate != NULL) {
@@ -195,7 +244,7 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 
 // Creates the container view here: create the dialog, then add the custom content and buttons
 - (UIView *)createContainerView
-{
+{// 如果开发者没有在调用时，赋值containerView这个属性，那么将创建一个默认的。
     if (containerView == NULL) {
         containerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 150)];
     }
@@ -203,13 +252,16 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
     CGSize screenSize = [self countScreenSize];
     CGSize dialogSize = [self countDialogSize];
 
-    // For the black background
+    // For the black background 最底层大弹窗，铺到整个屏幕
     [self setFrame:CGRectMake(0, 0, screenSize.width, screenSize.height)];
 
-    // This is the dialog's container; we attach the custom content and the buttons to this one
+    // This is the dialog's container; we attach the custom content and the buttons to this one。设置dialogContainer的frame，在屏幕中央显示。
     UIView *dialogContainer = [[UIView alloc] initWithFrame:CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height)];
 
     // First, we style the dialog to match the iOS7 UIAlertView >>>
+    /* lzy注170815：
+     给dialog一个layer样式，使得它与iOS7系统的UIAlertView相像。
+     */
     CAGradientLayer *gradient = [CAGradientLayer layer];
     gradient.frame = dialogContainer.bounds;
     gradient.colors = [NSArray arrayWithObjects:
@@ -218,10 +270,13 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
                        (id)[[UIColor colorWithRed:218.0/255.0 green:218.0/255.0 blue:218.0/255.0 alpha:1.0f] CGColor],
                        nil];
 
+    // 将CAGradientLayer加入到dialogContainer视图layer中
+    [dialogContainer.layer insertSublayer:gradient atIndex:0];
+    
     CGFloat cornerRadius = kDKAlertViewCornerRadius;
     gradient.cornerRadius = cornerRadius;
-    [dialogContainer.layer insertSublayer:gradient atIndex:0];
 
+    // dialogContainer自己的layer设置
     dialogContainer.layer.cornerRadius = cornerRadius;
     dialogContainer.layer.borderColor = [[UIColor colorWithRed:198.0/255.0 green:198.0/255.0 blue:198.0/255.0 alpha:1.0f] CGColor];
     dialogContainer.layer.borderWidth = 1;
@@ -231,6 +286,7 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
     dialogContainer.layer.shadowColor = [UIColor blackColor].CGColor;
     dialogContainer.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:dialogContainer.bounds cornerRadius:dialogContainer.layer.cornerRadius].CGPath;
 
+    // 内容与按钮的分割线
     // There is a line above the button
     UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, dialogContainer.bounds.size.height - buttonHeight - buttonSpacerHeight, dialogContainer.bounds.size.width, buttonSpacerHeight)];
     lineView.backgroundColor = [UIColor colorWithRed:198.0/255.0 green:198.0/255.0 blue:198.0/255.0 alpha:1.0f];
@@ -249,10 +305,13 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 // Helper function: add buttons to container
 - (void)addButtonsToView: (UIView *)container
 {
+    // 参数过滤
     if (buttonTitles==NULL) { return; }
 
+    // 按钮宽度均分屏幕
     CGFloat buttonWidth = container.bounds.size.width / [buttonTitles count];
 
+    // 循环创建并设置btn
     for (int i=0; i<[buttonTitles count]; i++) {
 
         UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -284,8 +343,13 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 }
 
 // Helper function: count and return the screen's size
+/* lzy注170815：
+ 工具方法。
+ 对iOS7以及iOS7以下的屏幕宽高获取，做一下兼容。
+ 对buttonHeight和buttonSpacerHeight做一下处理。
+ */
 - (CGSize)countScreenSize
-{
+{    // 如果开发者传入了多于0个按钮，或者没有传入（本类初始化时  buttonTitles = @[@"Close"]; 都将进入这个方法）。除非开发者自己传入空数组
     if (buttonTitles!=NULL && [buttonTitles count] > 0) {
         buttonHeight       = kDKAlertViewDefaultButtonHeight;
         buttonSpacerHeight = kDKAlertViewDefaultButtonSpacerHeight;
@@ -297,7 +361,7 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
     CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
 
-    // On iOS7, screen width and height doesn't automatically follow orientation
+    // On iOS7, screen width and height doesn't automatically follow orientation。在iOS7以及iOS7以下，系统返回的屏幕宽高不会跟随转屏，所以手动跟踪下，是横屏的时候，做一下处理。
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
         UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
         if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
@@ -312,23 +376,27 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 
 #if (defined(__IPHONE_7_0))
 // Add motion effects
+/* lzy注170815：
+ 视差效果
+ */
 - (void)applyMotionEffects {
 
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
         return;
     }
 
-    UIInterpolatingMotionEffect *horizontalEffect = [[UIInterpolatingMotionEffect alloc] initWithKeyPath:@"center.x"
-                                                                                                    type:UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis];
+    UIInterpolatingMotionEffect *horizontalEffect = [[UIInterpolatingMotionEffect alloc] initWithKeyPath:@"center.x" type:UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis];
+    
     horizontalEffect.minimumRelativeValue = @(-kDKMotionEffectExtent);
     horizontalEffect.maximumRelativeValue = @( kDKMotionEffectExtent);
 
-    UIInterpolatingMotionEffect *verticalEffect = [[UIInterpolatingMotionEffect alloc] initWithKeyPath:@"center.y"
-                                                                                                  type:UIInterpolatingMotionEffectTypeTiltAlongVerticalAxis];
+    UIInterpolatingMotionEffect *verticalEffect = [[UIInterpolatingMotionEffect alloc] initWithKeyPath:@"center.y" type:UIInterpolatingMotionEffectTypeTiltAlongVerticalAxis];
+    
     verticalEffect.minimumRelativeValue = @(-kDKMotionEffectExtent);
     verticalEffect.maximumRelativeValue = @( kDKMotionEffectExtent);
 
     UIMotionEffectGroup *motionEffectGroup = [[UIMotionEffectGroup alloc] init];
+    
     motionEffectGroup.motionEffects = @[horizontalEffect, verticalEffect];
 
     [dialogView addMotionEffect:motionEffectGroup];
@@ -417,17 +485,22 @@ const static CGFloat kDKMotionEffectExtent                = 10.0;
 // Handle keyboard show/hide changes
 - (void)keyboardWillShow: (NSNotification *)notification
 {
+    // 返回无误的屏幕宽高
     CGSize screenSize = [self countScreenSize];
+    // 获取对话框的size。内部是根据containerView来的，height是对button的高度做了添加。
     CGSize dialogSize = [self countDialogSize];
+    // 处理键盘的size
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
 
     UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    // 当是iOS7或者是iOS7以下，且是横屏的时候，对size做一下兼容处理。
     if (UIInterfaceOrientationIsLandscape(interfaceOrientation) && NSFoundationVersionNumber <= NSFoundationVersionNumber_iOS_7_1) {
         CGFloat tmp = keyboardSize.height;
         keyboardSize.height = keyboardSize.width;
         keyboardSize.width = tmp;
     }
-
+    
+    // 根据以上size数据的准备，在键盘将要弹出的时候。做动画修改弹窗的frame。
     [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionTransitionNone
 					 animations:^{
                          dialogView.frame = CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - keyboardSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height);

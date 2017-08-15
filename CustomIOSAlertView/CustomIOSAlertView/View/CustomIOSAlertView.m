@@ -139,6 +139,7 @@ CGFloat buttonSpacerHeight = 0;
 }
 
 // Button has been touched
+// 这是按钮点击响应的方法，内部回调delegate方法和block
 - (IBAction)customIOS7dialogButtonTouchUpInside:(id)sender
 {
     if (delegate != NULL) {

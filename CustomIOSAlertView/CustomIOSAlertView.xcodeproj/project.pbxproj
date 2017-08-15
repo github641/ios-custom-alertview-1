@@ -16,7 +16,6 @@
 		5EB26CDE17EC5EEB00F0971C /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5EB26CDC17EC5EEB00F0971C /* Main_iPhone.storyboard */; };
 		5EB26CE417EC5EEB00F0971C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB26CE317EC5EEB00F0971C /* ViewController.m */; };
 		5EB26D0317EC642000F0971C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EB26D0217EC642000F0971C /* Images.xcassets */; };
-		5EE9A9BB17EC68960031B75E /* CustomIOSAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EE9A9BA17EC68960031B75E /* CustomIOSAlertView.m */; };
 		5EE9A9BE17EC7EA60031B75E /* demo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5EE9A9BD17EC7EA60031B75E /* demo.png */; };
 		6C735F4C1F17141800B8C8BB /* DKAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C735F4B1F17141800B8C8BB /* DKAlertView.m */; };
 /* End PBXBuildFile section */
@@ -36,8 +35,6 @@
 		5EB26CE217EC5EEB00F0971C /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		5EB26CE317EC5EEB00F0971C /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		5EB26D0217EC642000F0971C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		5EE9A9B917EC68960031B75E /* CustomIOSAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomIOSAlertView.h; sourceTree = "<group>"; };
-		5EE9A9BA17EC68960031B75E /* CustomIOSAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomIOSAlertView.m; sourceTree = "<group>"; };
 		5EE9A9BD17EC7EA60031B75E /* demo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = demo.png; sourceTree = "<group>"; };
 		6C735F4A1F17141800B8C8BB /* DKAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKAlertView.h; sourceTree = "<group>"; };
 		6C735F4B1F17141800B8C8BB /* DKAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKAlertView.m; sourceTree = "<group>"; };
@@ -115,8 +112,6 @@
 			isa = PBXGroup;
 			children = (
 				6C735F491F17141800B8C8BB /* nativeAlert */,
-				5EE9A9B917EC68960031B75E /* CustomIOSAlertView.h */,
-				5EE9A9BA17EC68960031B75E /* CustomIOSAlertView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -205,7 +200,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6C735F4C1F17141800B8C8BB /* DKAlertView.m in Sources */,
-				5EE9A9BB17EC68960031B75E /* CustomIOSAlertView.m in Sources */,
 				5EB26CE417EC5EEB00F0971C /* ViewController.m in Sources */,
 				5EB26CDB17EC5EEB00F0971C /* AppDelegate.m in Sources */,
 				5EB26CD717EC5EEB00F0971C /* main.m in Sources */,
