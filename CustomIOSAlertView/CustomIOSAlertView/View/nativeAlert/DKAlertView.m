@@ -18,6 +18,9 @@
  设置了是否显示视差属性。
  调用了show方法。
 
+ alertView ：屏幕等宽高
+ dialogContainer：弹窗内容的容器，containerView（开发者传入或默认的）的size决定
+
  */
 
 #import "DKAlertView.h"
